@@ -1,25 +1,19 @@
 package aldebaran.game;
 
 public class Tile {
-    private int x;
-    private int y;
+    private Position position;
     private TileType type;
 
     private Unit unit;
 
-    public Tile(TileType type, int x, int y) {
+    public Tile(TileType type, Position pos) {
         this.type = type;
-        this.x = x;
-        this.y = y;
+        this.position = pos;
         this.unit = null;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+    public Position getPosition(){
+        return position;
     }
 
     public TileType getType() {
@@ -41,8 +35,7 @@ public class Tile {
     @Override
     public String toString() {
         return "Tile{" +
-                "x=" + x +
-                ", y=" + y +
+                "position=" + position +
                 ", type=" + type +
                 ", unit=" + unit +
                 '}';

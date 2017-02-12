@@ -1,7 +1,6 @@
 package aldebaran.engine;
 
 import aldebaran.game.*;
-import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -36,9 +35,9 @@ public class GameEngine {
 
     private Map<Unit, StackPane> gameUnits = new HashMap<>();
 
-    private Game game;
+    private Map<Wall, StackPane> gameWalls = new HashMap<>();
 
-    private AnimationTimer gameLoop;
+    private Game game;
 
     private Phase phase = Phase.READY;
 
@@ -58,11 +57,11 @@ public class GameEngine {
 
     private Consumer<Unit> onUnitMovedCallback() {
         return (Unit unit) -> {
-            System.out.println("move unit: " +unit);
+            System.out.println("move unit: " + unit);
             this.phase = Phase.ANIMATION;
             StackPane stackPane = gameUnits.get(unit);
-            double x_offset = unit.getTile().getX() * TILE_WIDTH;
-            double y_offset = unit.getTile().getY() * TILE_HEIGHT;
+            double x_offset = unit.getTile().getPosition().getX() * TILE_WIDTH;
+            double y_offset = unit.getTile().getPosition().getY() * TILE_HEIGHT;
             final Timeline timeline = new Timeline();
             timeline.setCycleCount(1);
             timeline.setAutoReverse(false);
@@ -79,19 +78,17 @@ public class GameEngine {
     private Group draw(Board board) {
         Group mapGroup = new Group();
         System.out.println("GameEngine.draw");
-        board.getTiles().forEach(tile -> {
-            StackPane tileStack = buildGameTile(tile);
-            gameTiles.put(tile, tileStack);
-        });
-
-        board.getUnits().forEach(unit -> {
-            StackPane stackPane = buildGameUnit(unit);
-            gameUnits.put(unit, stackPane);
-        });
+        drawTiles(board);
+        drawWalls(board);
+        drawUnits(board);
 
         gameTiles.forEach((tile, stackPane) -> {
             mapGroup.getChildren().add(stackPane);
             registerEventHandlers(tile, stackPane);
+        });
+
+        gameWalls.forEach((wall, stackPane) -> {
+            mapGroup.getChildren().add(stackPane);
         });
 
         gameUnits.forEach((unit, stackPane) -> {
@@ -100,15 +97,53 @@ public class GameEngine {
         return mapGroup;
     }
 
+    private void drawTiles(Board board) {
+        board.getTiles().forEach((pos,tile) -> {
+            StackPane tileStack = buildGameTile(tile);
+            gameTiles.put(tile, tileStack);
+        });
+    }
+
+    private void drawWalls(Board board) {
+        board.getWalls().forEach(wall -> {
+            StackPane tileStack = buildWall(wall);
+            gameWalls.put(wall, tileStack);
+        });
+    }
+
+    private void drawUnits(Board board) {
+        board.getUnits().forEach(unit -> {
+            StackPane stackPane = buildGameUnit(unit);
+            gameUnits.put(unit, stackPane);
+        });
+    }
+
     private StackPane buildGameUnit(Unit unit) {
-        double x_offset = unit.getTile().getX() * TILE_WIDTH;
-        double y_offset = unit.getTile().getY() * TILE_HEIGHT;
+        double x_offset = unit.getTile().getPosition().getX() * TILE_WIDTH;
+        double y_offset = unit.getTile().getPosition().getY() * TILE_HEIGHT;
         ImageView imageView = imageForUnit(unit.getType());
         imageView.setFitHeight(30);
         imageView.setFitWidth(30);
         StackPane stackPane = new StackPane();
         stackPane.setLayoutX(x_offset);
-        stackPane.setLayoutX(y_offset);
+        stackPane.setLayoutY(y_offset);
+        stackPane.setDisable(true);
+        stackPane.getChildren().add(imageView);
+        return stackPane;
+    }
+
+    private StackPane buildWall(Wall wall) {
+        System.out.println("wall = [" + wall + "]");
+        double x_offset = wall.getX() * TILE_WIDTH;
+        double y_offset = wall.getY() * TILE_HEIGHT / 2 - 8;
+        if (wall.getOrientation() == WallOrientation.VERTICAL) {
+            y_offset -= TILE_HEIGHT / 2 - 8;
+            x_offset -= 8;
+        }
+        ImageView imageView = getWallTextureFor(wall);
+        StackPane stackPane = new StackPane();
+        stackPane.setLayoutX(x_offset);
+        stackPane.setLayoutY(y_offset);
         stackPane.setDisable(true);
         stackPane.getChildren().add(imageView);
         return stackPane;
@@ -121,7 +156,7 @@ public class GameEngine {
     }
 
     private void handleClick(Tile tile) {
-        if (phase == Phase.READY){
+        if (phase == Phase.READY) {
             game.handleClick(tile);
         }
     }
@@ -129,8 +164,8 @@ public class GameEngine {
     private StackPane buildGameTile(Tile tile) {
         StackPane tileStack = new StackPane();
         Polygon square = new Polygon();
-        double x_offset = tile.getX() * TILE_WIDTH;
-        double y_offset = tile.getY() * TILE_HEIGHT;
+        double x_offset = tile.getPosition().getX() * TILE_WIDTH;
+        double y_offset = tile.getPosition().getY() * TILE_HEIGHT;
 
         tileStack.setLayoutX(x_offset);
         tileStack.setLayoutY(y_offset);
@@ -156,11 +191,11 @@ public class GameEngine {
     private ImagePattern getPatternForCode(TileType tileType) {
         switch (tileType) {
             case GRASS:
-                return new ImagePattern(new Image("assets/textures/grass1.png"));
+                return new ImagePattern(new Image("assets/textures/tiles/grass1.png"));
             case SAND:
-                return new ImagePattern(new Image("assets/textures/sand1.png"));
+                return new ImagePattern(new Image("assets/textures/tiles/sand1.png"));
             default:
-                return new ImagePattern(new Image("assets/textures/rock1.png"));
+                return new ImagePattern(new Image("assets/textures/tiles/rock1.png"));
         }
     }
 
@@ -168,5 +203,14 @@ public class GameEngine {
         ImageView imageView;
         imageView = new ImageView("assets/images/placeholder.png");
         return imageView;
+    }
+
+    private ImageView getWallTextureFor(Wall wall) {
+        switch (wall.getOrientation()) {
+            case HORIZONTAL:
+                return new ImageView(new Image("assets/textures/walls/wall_H_EW.png"));
+            default:
+                return new ImageView(new Image("assets/textures/walls/wall_V_NS.png"));
+        }
     }
 }
