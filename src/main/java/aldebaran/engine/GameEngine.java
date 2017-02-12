@@ -1,6 +1,8 @@
 package aldebaran.engine;
 
+import aldebaran.game.Game;
 import aldebaran.game.model.*;
+import aldebaran.ui.RollWidget;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -50,7 +52,6 @@ public class GameEngine {
         Board board = game.getBoard();
         board.setOnUnitMoved(onUnitMovedCallback());
         Scene scene = new Scene(draw(board), 1080, 920, Color.BLACK);
-
         stage.setScene(scene);
         stage.show();
     }
@@ -94,22 +95,28 @@ public class GameEngine {
         gameUnits.forEach((unit, stackPane) -> {
             mapGroup.getChildren().add(stackPane);
         });
+
+
+        RollWidget rollWidget = new RollWidget(900, 20, () -> game.handleRoll());
+        mapGroup.getChildren().add(rollWidget.show());
+
         return mapGroup;
     }
 
+
     private void drawTiles(Board board) {
-        board.getTiles().forEach((pos,tile) -> {
+        board.getTiles().forEach((pos, tile) -> {
             StackPane tileStack = buildGameTile(tile);
             gameTiles.put(tile, tileStack);
         });
     }
 
     private void drawWalls(Board board) {
-        board.getHorizontalWalls().forEach((position,wall) -> {
+        board.getHorizontalWalls().forEach((position, wall) -> {
             StackPane tileStack = buildWall(wall);
             gameWalls.put(wall, tileStack);
         });
-        board.getVerticalWalls().forEach((position,wall) -> {
+        board.getVerticalWalls().forEach((position, wall) -> {
             StackPane tileStack = buildWall(wall);
             gameWalls.put(wall, tileStack);
         });

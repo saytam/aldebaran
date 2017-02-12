@@ -13,6 +13,7 @@ public class Board {
     private Map<Position, Wall> verticalWalls;
 
     private Consumer<Unit> onUnitMoved;
+    private Random random = new Random(1243823);
 
     public Board(int width, int heigth) {
         initTiles(width, heigth);
@@ -27,7 +28,17 @@ public class Board {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < heigth; j++) {
                 Position position = new Position(i, j);
-                Tile tile = new Tile(TileType.SAND, position);
+                TileType type = TileType.GRASS;
+                switch (random.nextInt(3)) {
+                    case 0:
+                        break;
+                    case 1:
+                        type = TileType.ROCK;
+                        break;
+                    default:
+                        type = TileType.SAND;
+                }
+                Tile tile = new Tile(type, position);
                 tiles.put(position, tile);
             }
         }
@@ -38,12 +49,16 @@ public class Board {
         this.verticalWalls = new HashMap<>();
         for (int i = 0; i < width + 1; i++) {
             for (int j = 0; j < heigth + 1; j++) {
-                Position position = new Position(i,j);
-                if (!(i == width )){
-                    horizontalWalls.put(position, new Wall(position, WallOrientation.HORIZONTAL));
+                Position position = new Position(i, j);
+                if (!(i == width)) {
+                    if (random.nextInt(3) % 3 == 0) {
+                        horizontalWalls.put(position, new Wall(position, WallOrientation.HORIZONTAL));
+                    }
                 }
-                if (!(j == heigth)){
-                    verticalWalls.put(position, new Wall(position, WallOrientation.VERTICAL));
+                if (!(j == heigth)) {
+                    if (random.nextInt(3) % 3 == 0) {
+                        verticalWalls.put(position, new Wall(position, WallOrientation.VERTICAL));
+                    }
                 }
             }
         }
@@ -57,7 +72,7 @@ public class Board {
         return units;
     }
 
-    public Map<Position,Wall> getHorizontalWalls() {
+    public Map<Position, Wall> getHorizontalWalls() {
         return horizontalWalls;
     }
 
