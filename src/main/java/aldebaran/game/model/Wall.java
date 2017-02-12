@@ -1,22 +1,16 @@
-package aldebaran.game;
+package aldebaran.game.model;
 
 public class Wall {
-    private int x;
-    private int y;
+    private Position position;
     private WallOrientation orientation;
 
-    public Wall(int x, int y, WallOrientation orientation) {
-        this.x = x;
-        this.y = y;
+    public Wall(Position position, WallOrientation orientation) {
+        this.position = position;
         this.orientation = orientation;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+    public Position getPosition() {
+        return position;
     }
 
     public WallOrientation getOrientation() {
@@ -26,8 +20,7 @@ public class Wall {
     @Override
     public String toString() {
         return "Wall{" +
-                "x=" + x +
-                ", y=" + y +
+                "position=" + position +
                 ", orientation=" + orientation +
                 '}';
     }

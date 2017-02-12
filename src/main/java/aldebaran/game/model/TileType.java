@@ -1,4 +1,4 @@
-package aldebaran.game;
+package aldebaran.game.model;
 
 public enum TileType {
     GRASS, SAND, ROCK

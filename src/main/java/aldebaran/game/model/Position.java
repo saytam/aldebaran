@@ -1,4 +1,4 @@
-package aldebaran.game;
+package aldebaran.game.model;
 
 public class Position {
     private int x;
@@ -33,5 +33,13 @@ public class Position {
         int result = x;
         result = 31 * result + y;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Position{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }

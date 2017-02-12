@@ -1,4 +1,4 @@
-package aldebaran.game;
+package aldebaran.game.model;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -9,7 +9,8 @@ public class Board {
 
     private List<Unit> units;
 
-    private List<Wall> walls;
+    private Map<Position, Wall> horizontalWalls;
+    private Map<Position, Wall> verticalWalls;
 
     private Consumer<Unit> onUnitMoved;
 
@@ -33,16 +34,16 @@ public class Board {
     }
 
     private void initWalls(int width, int heigth) {
-        Random random = new Random();
-        this.walls = new ArrayList<>();
+        this.horizontalWalls = new HashMap<>();
+        this.verticalWalls = new HashMap<>();
         for (int i = 0; i < width + 1; i++) {
-            for (int j = 0; j < heigth * 2 + 1; j++) {
-                WallOrientation orientation = WallOrientation.VERTICAL;
-                if (j % 2 == 0) {
-                    orientation = WallOrientation.HORIZONTAL;
+            for (int j = 0; j < heigth + 1; j++) {
+                Position position = new Position(i,j);
+                if (!(i == width )){
+                    horizontalWalls.put(position, new Wall(position, WallOrientation.HORIZONTAL));
                 }
-                if (!(orientation == WallOrientation.HORIZONTAL && i == width)) {
-                    walls.add(new Wall(i, j, orientation));
+                if (!(j == heigth)){
+                    verticalWalls.put(position, new Wall(position, WallOrientation.VERTICAL));
                 }
             }
         }
@@ -56,8 +57,12 @@ public class Board {
         return units;
     }
 
-    public List<Wall> getWalls() {
-        return walls;
+    public Map<Position,Wall> getHorizontalWalls() {
+        return horizontalWalls;
+    }
+
+    public Map<Position, Wall> getVerticalWalls() {
+        return verticalWalls;
     }
 
     public void placeUnit(Unit unit, Tile tile) {

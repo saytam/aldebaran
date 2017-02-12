@@ -1,30 +1,30 @@
 package aldebaran.game.helper;
 
-import aldebaran.game.Board;
-import aldebaran.game.Tile;
-import aldebaran.game.Wall;
+import aldebaran.game.model.Board;
+import aldebaran.game.model.Position;
+import aldebaran.game.model.Tile;
+import aldebaran.game.model.Wall;
 
 import java.util.Optional;
 
 public class WallsForTile {
     public static Optional<Wall> topOf(Board board, Tile tile) {
-//        int tileX = tile.getX();
-//        int tileY = tile.getY();
-//        int wallX = tileX;
-//        int wallY = tileY * 2;
-//        return board.getWalls().stream().filter(wall -> wall.getX() == wallX && wall.getY() == wallY).findFirst();
-        return Optional.empty();
+        Position position = tile.getPosition();
+        return Optional.ofNullable(board.getHorizontalWalls().get(position));
     }
 
-    public Optional<Wall> bottomOf(Tile tile) {
-        return Optional.empty();
+    public Optional<Wall> bottomOf(Board board, Tile tile) {
+        Position position = tile.getPosition();
+        return Optional.ofNullable(board.getHorizontalWalls().get(new Position(position.getX(), position.getY() +1)));
     }
 
-    public Optional<Wall> leftOf(Tile tile) {
-        return Optional.empty();
+    public Optional<Wall> leftOf(Board board, Tile tile) {
+        Position position = tile.getPosition();
+        return Optional.ofNullable(board.getVerticalWalls().get(position));
     }
 
-    public Optional<Wall> rightOf(Tile tile) {
-        return Optional.empty();
+    public Optional<Wall> rightOf(Board board, Tile tile) {
+        Position position = tile.getPosition();
+        return Optional.ofNullable(board.getVerticalWalls().get(new Position(position.getX() +1, position.getY())));
     }
 }

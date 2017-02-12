@@ -1,6 +1,6 @@
 package aldebaran.engine;
 
-import aldebaran.game.*;
+import aldebaran.game.model.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -49,7 +49,7 @@ public class GameEngine {
         game = new Game();
         Board board = game.getBoard();
         board.setOnUnitMoved(onUnitMovedCallback());
-        Scene scene = new Scene(draw(board), 1024, 768, Color.BLACK);
+        Scene scene = new Scene(draw(board), 1080, 920, Color.BLACK);
 
         stage.setScene(scene);
         stage.show();
@@ -105,7 +105,11 @@ public class GameEngine {
     }
 
     private void drawWalls(Board board) {
-        board.getWalls().forEach(wall -> {
+        board.getHorizontalWalls().forEach((position,wall) -> {
+            StackPane tileStack = buildWall(wall);
+            gameWalls.put(wall, tileStack);
+        });
+        board.getVerticalWalls().forEach((position,wall) -> {
             StackPane tileStack = buildWall(wall);
             gameWalls.put(wall, tileStack);
         });
@@ -133,12 +137,12 @@ public class GameEngine {
     }
 
     private StackPane buildWall(Wall wall) {
-        System.out.println("wall = [" + wall + "]");
-        double x_offset = wall.getX() * TILE_WIDTH;
-        double y_offset = wall.getY() * TILE_HEIGHT / 2 - 8;
+//        System.out.println("wall = [" + wall + "]");
+        double x_offset = wall.getPosition().getX() * TILE_WIDTH;
+        double y_offset = wall.getPosition().getY() * TILE_HEIGHT - 8;
         if (wall.getOrientation() == WallOrientation.VERTICAL) {
-            y_offset -= TILE_HEIGHT / 2 - 8;
             x_offset -= 8;
+            y_offset += 8;
         }
         ImageView imageView = getWallTextureFor(wall);
         StackPane stackPane = new StackPane();
