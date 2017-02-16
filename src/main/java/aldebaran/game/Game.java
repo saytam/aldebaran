@@ -51,7 +51,6 @@ public class Game {
                 node.addNeighbour(new Node(adjacentTile));
             });
             graph.addNode(position, node);
-            System.out.println("adding node at position" + position + " with tile " + node.getTile());
         }));
     }
 
@@ -97,24 +96,33 @@ public class Game {
 
         while (!unvisited.isEmpty()) {
             Node nodeWithMinDistance = findNodeWithMinDistance(unvisited, distance);
+            if (nodeWithMinDistance.getTile().equals(targetTile)){
+                return;
+            }
             unvisited.remove(nodeWithMinDistance);
-
-            nodeWithMinDistance.getNeighbours().forEach(neighbour -> {
-                Integer updatedDistance = distance.get(nodeWithMinDistance) + 1;
-                if (updatedDistance < distance.get(neighbour)) {
-                    distance.put(neighbour, updatedDistance);
+            for (Node neighbour : nodeWithMinDistance.getNeighbours()) {
+                Integer newDistance = distance.get(nodeWithMinDistance) + 1;
+                if (newDistance < distance.get(neighbour)) {
+                    distance.put(neighbour, newDistance);
                     previous.put(neighbour, nodeWithMinDistance);
                 }
-            });
+            }
         }
     }
 
     private Node findNodeWithMinDistance(List<Node> unvisited, Map<Node, Integer> distance) {
-       return distance.entrySet().stream()
-                .filter(entry -> unvisited.contains(entry.getKey()))
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-                .findFirst()
-                .map(Map.Entry::getKey).get();
+        Node minDistanceNode = null;
+        for (Node possible: unvisited){
+            if (minDistanceNode == null || distance.get(possible) < distance.get(minDistanceNode)){
+                minDistanceNode = possible;
+            }
+        }
+        return minDistanceNode;
+//       return distance.entrySet().stream()
+//                .filter(entry -> unvisited.contains(entry.getKey()))
+//                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+//                .findFirst()
+//                .map(Map.Entry::getKey).get();
     }
 
     public Integer handleRoll() {
