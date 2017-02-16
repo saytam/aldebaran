@@ -17,6 +17,22 @@ public class Position {
         return y;
     }
 
+    public static Position northOf(Position position) {
+        return new Position(position.getX(), position.getY() - 1);
+    }
+
+    public static Position southOf(Position position) {
+        return new Position(position.getX(), position.getY() + 1);
+    }
+
+    public static Position eastOf(Position position) {
+        return new Position(position.getX() + 1, position.getY());
+    }
+
+    public static Position westOf(Position position) {
+        return new Position(position.getX() - 1, position.getY());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
