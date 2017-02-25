@@ -24,6 +24,8 @@ public class Game {
     private Integer lastRoll = 0;
     private int usedMovement = 0;
 
+    List<Node> currentPath;
+
     public Game() {
         this.board = new Board(10, 10);
         this.activeUnit = board.getUnits().get(0);
@@ -93,21 +95,34 @@ public class Game {
             }
             unvisited.add(node);
         }));
-
+        Node currentNode = null;
         while (!unvisited.isEmpty()) {
-            Node nodeWithMinDistance = findNodeWithMinDistance(unvisited, distance);
-            if (nodeWithMinDistance.getTile().equals(targetTile)){
-                return;
+            currentNode = findNodeWithMinDistance(unvisited, distance);
+            if (currentNode.getTile().equals(targetTile)){
+                break;
             }
-            unvisited.remove(nodeWithMinDistance);
-            for (Node neighbour : nodeWithMinDistance.getNeighbours()) {
-                Integer newDistance = distance.get(nodeWithMinDistance) + 1;
+            unvisited.remove(currentNode);
+            for (Node neighbour : currentNode.getNeighbours()) {
+                Integer newDistance = distance.get(currentNode) + 1;
                 if (newDistance < distance.get(neighbour)) {
                     distance.put(neighbour, newDistance);
-                    previous.put(neighbour, nodeWithMinDistance);
+                    previous.put(neighbour, currentNode);
                 }
             }
         }
+
+        if (previous.get(currentNode) == null){
+            System.out.println("no path found from "+ source +" to "+currentNode);
+            return;
+        }
+        currentPath = new ArrayList<Node>();
+        while (currentNode != null){
+            currentPath.add(currentNode);
+            currentNode = previous.get(currentNode);
+        }
+//        currentPath.
+       Collections.reverse(currentPath);
+        System.out.println("done" + currentPath);
     }
 
     private Node findNodeWithMinDistance(List<Node> unvisited, Map<Node, Integer> distance) {
