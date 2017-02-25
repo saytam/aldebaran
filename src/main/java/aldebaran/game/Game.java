@@ -7,6 +7,7 @@ import aldebaran.game.model.Unit;
 import aldebaran.game.pathfinding.AdjacentTiles;
 import aldebaran.game.pathfinding.Graph;
 import aldebaran.game.pathfinding.Node;
+import aldebaran.game.pathfinding.Path;
 
 import java.util.*;
 
@@ -23,8 +24,6 @@ public class Game {
     private Unit activeUnit = null;
     private Integer lastRoll = 0;
     private int usedMovement = 0;
-
-    List<Node> currentPath;
 
     public Game() {
         this.board = new Board(10, 10);
@@ -66,8 +65,8 @@ public class Game {
             System.out.println("tile = [" + tile + "]");
             if (unit == null && activeUnit != null) {
 
-                moveSelectedUnit(tile);
-                board.moveUnit(activeUnit, tile);
+                updatePathOfUnit(activeUnit, tile);
+                board.moveUnit(activeUnit);
             }
 //            if (activeUnit == null && unit != null) {
 //                activeUnit =
@@ -77,11 +76,16 @@ public class Game {
         }
     }
 
-    private void moveSelectedUnit(Tile targetTile) {
+    private void updatePathOfUnit(Unit unit, Tile target) {
+        Path path = findPath(unit, target);
+        unit.setPath(path);
+    }
+
+    private Path findPath(Unit unit, Tile targetTile) {
         final Integer INFINITY = Integer.MAX_VALUE;
         Map<Node, Integer> distance = new HashMap<>();
         Map<Node, Node> previous = new HashMap<>();
-        Position sourcePosition = this.activeUnit.getTile().getPosition();
+        Position sourcePosition = unit.getTile().getPosition();
         List<Node> unvisited = new LinkedList<>();
 
         final Node source = graph.nodeAtPosition(sourcePosition);
@@ -98,7 +102,7 @@ public class Game {
         Node currentNode = null;
         while (!unvisited.isEmpty()) {
             currentNode = findNodeWithMinDistance(unvisited, distance);
-            if (currentNode.getTile().equals(targetTile)){
+            if (currentNode.getTile().equals(targetTile)) {
                 break;
             }
             unvisited.remove(currentNode);
@@ -111,33 +115,29 @@ public class Game {
             }
         }
 
-        if (previous.get(currentNode) == null){
-            System.out.println("no path found from "+ source +" to "+currentNode);
-            return;
+        if (previous.get(currentNode) == null) {
+            System.out.println("no path found from " + source + " to " + currentNode);
+            return null;
         }
-        currentPath = new ArrayList<Node>();
-        while (currentNode != null){
+        List<Node> currentPath = new ArrayList<Node>();
+        while (currentNode != null) {
             currentPath.add(currentNode);
             currentNode = previous.get(currentNode);
         }
-//        currentPath.
-       Collections.reverse(currentPath);
-        System.out.println("done" + currentPath);
+        Collections.reverse(currentPath);
+        Path path = new Path(currentPath);
+        System.out.println("done: " + currentPath);
+        return path;
     }
 
     private Node findNodeWithMinDistance(List<Node> unvisited, Map<Node, Integer> distance) {
         Node minDistanceNode = null;
-        for (Node possible: unvisited){
-            if (minDistanceNode == null || distance.get(possible) < distance.get(minDistanceNode)){
+        for (Node possible : unvisited) {
+            if (minDistanceNode == null || distance.get(possible) < distance.get(minDistanceNode)) {
                 minDistanceNode = possible;
             }
         }
         return minDistanceNode;
-//       return distance.entrySet().stream()
-//                .filter(entry -> unvisited.contains(entry.getKey()))
-//                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-//                .findFirst()
-//                .map(Map.Entry::getKey).get();
     }
 
     public Integer handleRoll() {

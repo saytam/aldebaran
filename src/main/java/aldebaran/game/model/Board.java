@@ -1,5 +1,7 @@
 package aldebaran.game.model;
 
+import aldebaran.game.pathfinding.Path;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -90,11 +92,17 @@ public class Board {
         tile.removeUnit();
     }
 
-    public void moveUnit(Unit unit, Tile tile) {
+    public void moveUnit(Unit unit) {
+
+        Path toTarget = unit.getPath();
+        if (toTarget == null){
+            return;
+        }
+        Tile nextTile = toTarget.nextTile();
         Tile oldTile = unit.getTile();
-        System.out.println("moving unit [" + unit + "], from tile  [" + oldTile + "] to tile [" + tile + "]");
+        System.out.println("moving unit [" + unit + "], from tile  [" + oldTile + "] to tile [" + nextTile + "]");
         removeUnit(unit, oldTile);
-        placeUnit(unit, tile);
+        placeUnit(unit, nextTile);
         onUnitMoved.accept(unit);
     }
 
