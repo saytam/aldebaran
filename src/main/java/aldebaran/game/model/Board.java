@@ -14,7 +14,8 @@ public class Board {
     private Map<Position, Wall> horizontalWalls;
     private Map<Position, Wall> verticalWalls;
 
-    private Consumer<Unit> onUnitMoved;
+    private Consumer<Unit> onUnitMoveFinished;
+    private Consumer<Unit> onUnitMoveStep;
     private Random random = new Random(1243823);
 
     public Board(int width, int heigth) {
@@ -93,9 +94,9 @@ public class Board {
     }
 
     public void moveUnit(Unit unit) {
-
         Path toTarget = unit.getPath();
-        if (toTarget == null){
+        if (toTarget == null) {
+            onUnitMoveFinished.accept(unit);
             return;
         }
         Tile nextTile = toTarget.nextTile();
@@ -103,10 +104,14 @@ public class Board {
         System.out.println("moving unit [" + unit + "], from tile  [" + oldTile + "] to tile [" + nextTile + "]");
         removeUnit(unit, oldTile);
         placeUnit(unit, nextTile);
-        onUnitMoved.accept(unit);
+        this.onUnitMoveStep.accept(unit);
     }
 
-    public void setOnUnitMoved(Consumer<Unit> onUnitMoved) {
-        this.onUnitMoved = onUnitMoved;
+    public void setOnUnitMoveFinished(Consumer<Unit> onUnitMoveFinished) {
+        this.onUnitMoveFinished = onUnitMoveFinished;
+    }
+
+    public void setOnUnitMoveStep(Consumer<Unit> onUnitMoveStep) {
+        this.onUnitMoveStep = onUnitMoveStep;
     }
 }

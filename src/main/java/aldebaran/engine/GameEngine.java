@@ -3,6 +3,7 @@ package aldebaran.engine;
 import aldebaran.game.Game;
 import aldebaran.game.model.*;
 import aldebaran.ui.RollWidget;
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -19,7 +20,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 
 public class GameEngine {
@@ -39,6 +43,8 @@ public class GameEngine {
 
     private Map<Wall, StackPane> gameWalls = new HashMap<>();
 
+    private Queue<Animation> animationQueue = new LinkedList<>();
+
     private Game game;
 
     private Phase phase = Phase.READY;
@@ -50,15 +56,16 @@ public class GameEngine {
     public void start() {
         game = new Game();
         Board board = game.getBoard();
-        board.setOnUnitMoved(onUnitMovedCallback());
+        board.setOnUnitMoveFinished(onUnitMoveFinishedCallback());
+        board.setOnUnitMoveStep(onUnitMoveStepCallback());
         Scene scene = new Scene(draw(board), 1080, 920, Color.BLACK);
         stage.setScene(scene);
         stage.show();
     }
 
-    private Consumer<Unit> onUnitMovedCallback() {
+    private Consumer<Unit> onUnitMoveFinishedCallback() {
         return (Unit unit) -> {
-            System.out.println("move unit: " + unit);
+            System.out.println("move unit finish: " + unit);
             this.phase = Phase.ANIMATION;
             StackPane stackPane = gameUnits.get(unit);
             double x_offset = unit.getTile().getPosition().getX() * TILE_WIDTH;
@@ -73,6 +80,40 @@ public class GameEngine {
             timeline.setOnFinished(event -> {
                 this.phase = Phase.READY;
             });
+        };
+    }
+
+    public void triggerNextAnimation(){
+        System.out.println("trigger Animation");
+        Animation animation = animationQueue.poll();
+        if (animation != null){
+            this.phase = Phase.ANIMATION;
+            animation.play();
+        } else {
+            this.phase = Phase.READY;
+        }
+    }
+
+    private Consumer<Unit> onUnitMoveStepCallback() {
+        return (Unit unit) -> {
+            System.out.println("move unit step: " + unit);
+
+            StackPane stackPane = gameUnits.get(unit);
+            double x_offset = unit.getTile().getPosition().getX() * TILE_WIDTH;
+            double y_offset = unit.getTile().getPosition().getY() * TILE_HEIGHT;
+            final Timeline timeline = new Timeline();
+            timeline.setCycleCount(1);
+            timeline.setAutoReverse(false);
+            timeline.getKeyFrames().add(new KeyFrame(Duration.millis(500),
+                    new KeyValue(stackPane.translateXProperty(), x_offset),
+                    new KeyValue(stackPane.translateYProperty(), y_offset)));
+            animationQueue.add(timeline);
+            timeline.setOnFinished(event -> {
+                triggerNextAnimation();
+            });
+            if (this.phase != Phase.ANIMATION){
+                triggerNextAnimation();
+            }
         };
     }
 

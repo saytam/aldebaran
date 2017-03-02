@@ -64,9 +64,13 @@ public class Game {
             Unit unit = tile.getUnit();
             System.out.println("tile = [" + tile + "]");
             if (unit == null && activeUnit != null) {
-
                 updatePathOfUnit(activeUnit, tile);
-                board.moveUnit(activeUnit);
+                while (activeUnit.getPath() != null){
+                    board.moveUnit(activeUnit);
+                    updatePathOfUnit(activeUnit, tile);
+                }
+
+
             }
 //            if (activeUnit == null && unit != null) {
 //                activeUnit =
